@@ -1,148 +1,133 @@
-// src/pages/Dashboard.tsx
 import React from 'react';
-import { 
-  Box, 
-  Typography, 
-  Paper, 
-  Grid, 
-  CircularProgress,
-  Button,
-  Chip,
-  Alert
-} from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { DragDropContext, DropResult } from 'react-beautiful-dnd';
-import { CardStatus } from '../types/Card';
-import CardColumn from '../components/cards/CardColumn';
+import { Box, Typography, Paper, Grid, Chip, Button } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 import { useCardContext } from '../contexts/CardContext';
+import { formatDate } from '../utils/formatters';
 
-const Dashboard: React.FC = () => {
-  // Aqui usaríamos o contexto de cards, mas como ainda não temos, vamos simular
+const Dashboard = () => {
   const navigate = useNavigate();
-  const location = useLocation();
+  const { cards, loading, error, moveCard } = useCardContext();
   
-  // Estado simulado - em uma implementação real, viria do contexto
-  const [loading, setLoading] = React.useState(false);
-  const [error, setError] = React.useState<string | null>(null);
-  const [cards, setCards] = React.useState([]);
+  // Agrupar cards por status
+  const cardsByStatus = React.useMemo(() => {
+    const statusGroups: Record<string, any[]> = {
+      'Solicitado': [],
+      'Aprovado': [],
+      'Fila de Produção': [],
+      'Em Produção': [],
+      'Finalizado': []
+    };
+    
+    cards.forEach(card => {
+      if (statusGroups[card.status]) {
+        statusGroups[card.status].push(card);
+      }
+    });
+    
+    return statusGroups;
+  }, [cards]);
   
-  // Status disponíveis no sistema
-  const statuses: CardStatus[] = [
-    'Solicitado',
-    'Aprovado',
-    'Fila de Produção',
-    'Em Produção',
-    'Finalizado'
-  ];
-  
-  // Função simulada para obter cards por status
-  const getCardsByStatus = (status: CardStatus) => {
-    return cards.filter((card: any) => card.status === status);
+  // Função para navegar para os detalhes do card
+  const handleViewDetails = (cardId: string) => {
+    navigate(`/cards/${cardId}`);
   };
   
-  // Manipular o arrastar e soltar
-  const handleDragEnd = async (result: DropResult) => {
-    const { destination, source, draggableId } = result;
-    
-    // Se não houver destino ou o destino for o mesmo que a origem, não fazer nada
-    if (!destination || 
-        (destination.droppableId === source.droppableId && 
-         destination.index === source.index)) {
-      return;
-    }
-    
-    // Atualizar o status do card - em uma implementação real, chamaríamos a API
-    const newStatus = destination.droppableId as CardStatus;
-    
-    console.log(`Movendo card ${draggableId} para status ${newStatus}`);
-    
-    // Se o status for "Finalizado", redirecionar para a página de detalhes
-    if (newStatus === 'Finalizado') {
-      navigate(`/cards/${draggableId}?showCostForm=true`);
+  // Função para determinar a cor do chip de status
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'Finalizado':
+        return 'success';
+      case 'Em Produção':
+        return 'info';
+      case 'Fila de Produção':
+        return 'warning';
+      case 'Aprovado':
+        return 'primary';
+      default:
+        return 'default';
     }
   };
-  
-  // Verificar se há mensagem de sucesso na navegação
-  const successMessage = location.state?.success;
   
   return (
     <Box sx={{ flexGrow: 1 }}>
-      <Box sx={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center',
-        mb: 3
-      }}>
-        <Typography variant="h4" component="h1" gutterBottom>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Typography variant="h4" component="h1">
           Dashboard
         </Typography>
-        
-        <Button 
-          variant="contained" 
-          color="primary" 
-          startIcon={<AddIcon />}
+        <Button
+          variant="contained"
+          color="primary"
           onClick={() => navigate('/cards/novo')}
         >
           Nova Solicitação
         </Button>
       </Box>
       
-      {successMessage && (
-        <Alert severity="success" sx={{ mb: 3 }} onClose={() => {
-          navigate(location.pathname, { replace: true });
-        }}>
-          {successMessage}
-        </Alert>
-      )}
-      
       {error && (
-        <Alert severity="error" sx={{ mb: 3 }}>
-          {error}
-        </Alert>
+        <Typography color="error" sx={{ mb: 2 }}>
+          Erro ao carregar solicitações: {error}
+        </Typography>
       )}
       
-      {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
-          <CircularProgress />
-        </Box>
-      ) : (
-        <DragDropContext onDragEnd={handleDragEnd}>
-          <Grid container spacing={2}>
-            {statuses.map((status) => (
-              <Grid item xs={12} sm={6} md={4} lg={2.4} key={status}>
-                <Paper 
-                  sx={{ 
-                    p: 2, 
-                    height: 'calc(100vh - 280px)',
-                    display: 'flex',
-                    flexDirection: 'column'
-                  }}
-                >
-                  <Box sx={{ 
-                    display: 'flex', 
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    mb: 2
-                  }}>
+      <Grid container spacing={2}>
+        {Object.keys(cardsByStatus).map((status) => {
+          return (
+            <React.Fragment key={status}>
+              <Grid item xs={12} sm={6} md={4} lg={2}>
+                <Paper sx={{ p: 2, height: '100%' }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                     <Typography variant="h6">{status}</Typography>
                     <Chip 
-                      label={getCardsByStatus(status).length} 
-                      size="small" 
-                      color="primary"
+                      label={cardsByStatus[status].length} 
+                      color={getStatusColor(status) as any}
+                      size="small"
                     />
                   </Box>
                   
-                  <CardColumn 
-                    status={status} 
-                    cards={getCardsByStatus(status)} 
-                  />
+                  <Box sx={{ overflowY: 'auto', maxHeight: 'calc(100vh - 250px)' }}>
+                    {cardsByStatus[status].map((card) => {
+                      return (
+                        <React.Fragment key={card.id}>
+                          <Paper 
+                            sx={{ 
+                              p: 2, 
+                              mb: 2,
+                              cursor: 'pointer',
+                              '&:hover': {
+                                boxShadow: 3
+                              }
+                            }}
+                            onClick={() => handleViewDetails(card.id)}
+                          >
+                            <Typography variant="subtitle1" noWrap>{card.title}</Typography>
+                            <Typography variant="body2" color="text.secondary" noWrap>
+                              {card.partName}
+                            </Typography>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
+                              <Typography variant="caption" color="text.secondary">
+                                {formatDate(card.requestDate)}
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                {card.requesterName}
+                              </Typography>
+                            </Box>
+                          </Paper>
+                        </React.Fragment>
+                      );
+                    })}
+                    
+                    {cardsByStatus[status].length === 0 && (
+                      <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 2 }}>
+                        Nenhuma solicitação
+                      </Typography>
+                    )}
+                  </Box>
                 </Paper>
               </Grid>
-            ))}
-          </Grid>
-        </DragDropContext>
-      )}
+            </React.Fragment>
+          );
+        })}
+      </Grid>
     </Box>
   );
 };

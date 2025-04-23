@@ -51,44 +51,48 @@ const AllCards = () => {
       )}
 
       <Grid container spacing={2}>
-        {cards.map((card) => (
-          <Grid item xs={12} key={card.id}>
-            <Paper 
-              sx={{ 
-                p: 2, 
-                cursor: 'pointer',
-                '&:hover': {
-                  boxShadow: 6
-                }
-              }}
-              onClick={() => handleViewDetails(card.id)}
-            >
-              <Grid container spacing={2} alignItems="center">
-                <Grid item xs={12} sm={6}>
-                  <Typography variant="h6">{card.title}</Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {card.partName} - {card.brand} {card.model}
-                  </Typography>
-                </Grid>
-                <Grid item xs={6} sm={2}>
-                  <Typography variant="body2" color="text.secondary">Solicitante</Typography>
-                  <Typography variant="body2">{card.requesterName}</Typography>
-                </Grid>
-                <Grid item xs={6} sm={2}>
-                  <Typography variant="body2" color="text.secondary">Data</Typography>
-                  <Typography variant="body2">{formatDate(card.requestDate)}</Typography>
-                </Grid>
-                <Grid item xs={12} sm={2} sx={{ display: 'flex', justifyContent: { xs: 'flex-start', sm: 'flex-end' } }}>
-                  <Chip 
-                    label={card.status} 
-                    color={getStatusColor(card.status) as any}
-                    size="small"
-                  />
-                </Grid>
+        {cards.map((card) => {
+          return (
+            <React.Fragment key={card.id}>
+              <Grid item xs={12}>
+                <Paper 
+                  sx={{ 
+                    p: 2, 
+                    cursor: 'pointer',
+                    '&:hover': {
+                      boxShadow: 6
+                    }
+                  }}
+                  onClick={() => handleViewDetails(card.id)}
+                >
+                  <Grid container spacing={2} alignItems="center">
+                    <Grid item xs={12} sm={6}>
+                      <Typography variant="h6">{card.title}</Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {card.partName} - {card.brand} {card.model}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={6} sm={2}>
+                      <Typography variant="body2" color="text.secondary">Solicitante</Typography>
+                      <Typography variant="body2">{card.requesterName}</Typography>
+                    </Grid>
+                    <Grid item xs={6} sm={2}>
+                      <Typography variant="body2" color="text.secondary">Data</Typography>
+                      <Typography variant="body2">{formatDate(card.requestDate)}</Typography>
+                    </Grid>
+                    <Grid item xs={12} sm={2} sx={{ display: 'flex', justifyContent: { xs: 'flex-start', sm: 'flex-end' } }}>
+                      <Chip 
+                        label={card.status} 
+                        color={getStatusColor(card.status) as any}
+                        size="small"
+                      />
+                    </Grid>
+                  </Grid>
+                </Paper>
               </Grid>
-            </Paper>
-          </Grid>
-        ))}
+            </React.Fragment>
+          );
+        })}
 
         {!loading && cards.length === 0 && (
           <Grid item xs={12}>

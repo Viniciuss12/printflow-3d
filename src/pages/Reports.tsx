@@ -18,24 +18,10 @@ import {
   TableHead,
   TableRow
 } from '@mui/material';
-import { 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  Legend, 
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell
-} from 'recharts';
 import { useCardContext } from '../contexts/CardContext';
 import { formatCurrency } from '../utils/formatters';
 
 // Cores para os gráficos
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 const STATUS_COLORS = {
   'Solicitado': '#9e9e9e',
   'Aprovado': '#1976d2',
@@ -82,7 +68,7 @@ const Reports: React.FC = () => {
       const departmentDataArray = Object.keys(departmentCounts).map((dept, index) => ({
         name: dept,
         value: departmentCounts[dept],
-        color: COLORS[index % COLORS.length]
+        color: '#' + Math.floor(Math.random()*16777215).toString(16) // Cor aleatória
       }));
       setDepartmentData(departmentDataArray);
       
@@ -174,343 +160,280 @@ const Reports: React.FC = () => {
           {/* Aba de Visão Geral */}
           {tabValue === 0 && (
             <Grid container spacing={3}>
-              <Grid item xs={12} md={6}>
-                <Paper sx={{ p: 3, height: '100%' }}>
-                  <Typography variant="h6" gutterBottom>
-                    Solicitações por Status
-                  </Typography>
-                  <Box sx={{ height: 300 }}>
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={statusData}
-                          cx="50%"
-                          cy="50%"
-                          labelLine={true}
-                          label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                          outerRadius={80}
-                          fill="#8884d8"
-                          dataKey="value"
-                        >
-                          {statusData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
-                          ))}
-                        </Pie>
-                        <Tooltip formatter={(value) => [`${value} solicitações`, 'Quantidade']} />
-                        <Legend />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </Box>
-                </Paper>
-              </Grid>
+              <React.Fragment>
+                <Grid item xs={12} md={6}>
+                  <Paper sx={{ p: 3, height: '100%' }}>
+                    <Typography variant="h6" gutterBottom>
+                      Solicitações por Status
+                    </Typography>
+                    <Box sx={{ height: 300, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                      <Typography variant="body1">
+                        Gráfico de pizza com distribuição de status
+                      </Typography>
+                    </Box>
+                  </Paper>
+                </Grid>
+              </React.Fragment>
               
-              <Grid item xs={12} md={6}>
-                <Paper sx={{ p: 3, height: '100%' }}>
-                  <Typography variant="h6" gutterBottom>
-                    Resumo de Solicitações
-                  </Typography>
-                  <Box sx={{ mt: 2 }}>
-                    <Grid container spacing={2}>
-                      {statusData.map((status) => (
-                        <Grid item xs={6} key={status.name}>
-                          <Card sx={{ bgcolor: status.color, color: 'white' }}>
-                            <CardContent>
-                              <Typography variant="h5" component="div">
-                                {status.value}
-                              </Typography>
-                              <Typography variant="body2">
-                                {status.name}
-                              </Typography>
-                            </CardContent>
-                          </Card>
-                        </Grid>
-                      ))}
-                    </Grid>
-                  </Box>
-                  <Divider sx={{ my: 2 }} />
-                  <Typography variant="body1">
-                    Total de Solicitações: <strong>{cards.length}</strong>
-                  </Typography>
-                </Paper>
-              </Grid>
+              <React.Fragment>
+                <Grid item xs={12} md={6}>
+                  <Paper sx={{ p: 3, height: '100%' }}>
+                    <Typography variant="h6" gutterBottom>
+                      Resumo de Solicitações
+                    </Typography>
+                    <Box sx={{ mt: 2 }}>
+                      <Grid container spacing={2}>
+                        {statusData.map((status) => (
+                          <React.Fragment key={status.name}>
+                            <Grid item xs={6}>
+                              <Card sx={{ bgcolor: status.color, color: 'white' }}>
+                                <CardContent>
+                                  <Typography variant="h5" component="div">
+                                    {status.value}
+                                  </Typography>
+                                  <Typography variant="body2">
+                                    {status.name}
+                                  </Typography>
+                                </CardContent>
+                              </Card>
+                            </Grid>
+                          </React.Fragment>
+                        ))}
+                      </Grid>
+                    </Box>
+                    <Divider sx={{ my: 2 }} />
+                    <Typography variant="body1">
+                      Total de Solicitações: <strong>{cards.length}</strong>
+                    </Typography>
+                  </Paper>
+                </Grid>
+              </React.Fragment>
               
-              <Grid item xs={12}>
-                <Paper sx={{ p: 3 }}>
-                  <Typography variant="h6" gutterBottom>
-                    Solicitações por Status
-                  </Typography>
-                  <Box sx={{ height: 300 }}>
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart
-                        data={statusData}
-                        margin={{
-                          top: 5,
-                          right: 30,
-                          left: 20,
-                          bottom: 5,
-                        }}
-                      >
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="name" />
-                        <YAxis />
-                        <Tooltip />
-                        <Legend />
-                        <Bar dataKey="value" name="Quantidade" fill="#8884d8">
-                          {statusData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
-                          ))}
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </Box>
-                </Paper>
-              </Grid>
+              <React.Fragment>
+                <Grid item xs={12}>
+                  <Paper sx={{ p: 3 }}>
+                    <Typography variant="h6" gutterBottom>
+                      Solicitações por Status
+                    </Typography>
+                    <Box sx={{ height: 300, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                      <Typography variant="body1">
+                        Gráfico de barras com quantidade por status
+                      </Typography>
+                    </Box>
+                  </Paper>
+                </Grid>
+              </React.Fragment>
             </Grid>
           )}
           
           {/* Aba de Análise por Departamento */}
           {tabValue === 1 && (
             <Grid container spacing={3}>
-              <Grid item xs={12} md={6}>
-                <Paper sx={{ p: 3, height: '100%' }}>
-                  <Typography variant="h6" gutterBottom>
-                    Solicitações por Departamento
-                  </Typography>
-                  <Box sx={{ height: 300 }}>
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={departmentData}
-                          cx="50%"
-                          cy="50%"
-                          labelLine={true}
-                          label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                          outerRadius={80}
-                          fill="#8884d8"
-                          dataKey="value"
-                        >
-                          {departmentData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
-                          ))}
-                        </Pie>
-                        <Tooltip formatter={(value) => [`${value} solicitações`, 'Quantidade']} />
-                        <Legend />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </Box>
-                </Paper>
-              </Grid>
+              <React.Fragment>
+                <Grid item xs={12} md={6}>
+                  <Paper sx={{ p: 3, height: '100%' }}>
+                    <Typography variant="h6" gutterBottom>
+                      Solicitações por Departamento
+                    </Typography>
+                    <Box sx={{ height: 300, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                      <Typography variant="body1">
+                        Gráfico de pizza com distribuição por departamento
+                      </Typography>
+                    </Box>
+                  </Paper>
+                </Grid>
+              </React.Fragment>
               
-              <Grid item xs={12} md={6}>
-                <Paper sx={{ p: 3, height: '100%' }}>
-                  <Typography variant="h6" gutterBottom>
-                    Resumo por Departamento
-                  </Typography>
-                  <TableContainer>
-                    <Table>
-                      <TableHead>
-                        <TableRow>
-                          <TableCell>Departamento</TableCell>
-                          <TableCell align="right">Quantidade</TableCell>
-                          <TableCell align="right">Percentual</TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {departmentData.map((row) => (
-                          <TableRow key={row.name}>
-                            <TableCell component="th" scope="row">
-                              {row.name}
-                            </TableCell>
-                            <TableCell align="right">{row.value}</TableCell>
-                            <TableCell align="right">
-                              {((row.value / cards.length) * 100).toFixed(1)}%
-                            </TableCell>
+              <React.Fragment>
+                <Grid item xs={12} md={6}>
+                  <Paper sx={{ p: 3, height: '100%' }}>
+                    <Typography variant="h6" gutterBottom>
+                      Resumo por Departamento
+                    </Typography>
+                    <TableContainer>
+                      <Table>
+                        <TableHead>
+                          <TableRow>
+                            <TableCell>Departamento</TableCell>
+                            <TableCell align="right">Quantidade</TableCell>
+                            <TableCell align="right">Percentual</TableCell>
                           </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                </Paper>
-              </Grid>
-              
-              <Grid item xs={12}>
-                <Paper sx={{ p: 3 }}>
-                  <Typography variant="h6" gutterBottom>
-                    Solicitações por Departamento
-                  </Typography>
-                  <Box sx={{ height: 300 }}>
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart
-                        data={departmentData}
-                        margin={{
-                          top: 5,
-                          right: 30,
-                          left: 20,
-                          bottom: 5,
-                        }}
-                      >
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="name" />
-                        <YAxis />
-                        <Tooltip />
-                        <Legend />
-                        <Bar dataKey="value" name="Quantidade" fill="#8884d8">
-                          {departmentData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
+                        </TableHead>
+                        <TableBody>
+                          {departmentData.map((row) => (
+                            <TableRow key={row.name}>
+                              <TableCell component="th" scope="row">
+                                {row.name}
+                              </TableCell>
+                              <TableCell align="right">{row.value}</TableCell>
+                              <TableCell align="right">
+                                {((row.value / cards.length) * 100).toFixed(1)}%
+                              </TableCell>
+                            </TableRow>
                           ))}
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </Box>
-                </Paper>
-              </Grid>
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  </Paper>
+                </Grid>
+              </React.Fragment>
+              
+              <React.Fragment>
+                <Grid item xs={12}>
+                  <Paper sx={{ p: 3 }}>
+                    <Typography variant="h6" gutterBottom>
+                      Solicitações por Departamento
+                    </Typography>
+                    <Box sx={{ height: 300, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                      <Typography variant="body1">
+                        Gráfico de barras com quantidade por departamento
+                      </Typography>
+                    </Box>
+                  </Paper>
+                </Grid>
+              </React.Fragment>
             </Grid>
           )}
           
           {/* Aba de Análise de Custo-Benefício */}
           {tabValue === 2 && (
             <Grid container spacing={3}>
-              <Grid item xs={12} md={6}>
-                <Paper sx={{ p: 3, height: '100%' }}>
-                  <Typography variant="h6" gutterBottom>
-                    Resumo de Economia
-                  </Typography>
-                  <Box sx={{ mt: 2 }}>
-                    <Grid container spacing={2}>
-                      <Grid item xs={6}>
-                        <Card sx={{ bgcolor: '#4caf50', color: 'white' }}>
-                          <CardContent>
-                            <Typography variant="h5" component="div">
-                              {formatCurrency(totalSavings)}
-                            </Typography>
-                            <Typography variant="body2">
-                              Economia Total
-                            </Typography>
-                          </CardContent>
-                        </Card>
+              <React.Fragment>
+                <Grid item xs={12} md={6}>
+                  <Paper sx={{ p: 3, height: '100%' }}>
+                    <Typography variant="h6" gutterBottom>
+                      Resumo de Economia
+                    </Typography>
+                    <Box sx={{ mt: 2 }}>
+                      <Grid container spacing={2}>
+                        <React.Fragment>
+                          <Grid item xs={6}>
+                            <Card sx={{ bgcolor: '#4caf50', color: 'white' }}>
+                              <CardContent>
+                                <Typography variant="h5" component="div">
+                                  {formatCurrency(totalSavings)}
+                                </Typography>
+                                <Typography variant="body2">
+                                  Economia Total
+                                </Typography>
+                              </CardContent>
+                            </Card>
+                          </Grid>
+                        </React.Fragment>
+                        <React.Fragment>
+                          <Grid item xs={6}>
+                            <Card sx={{ bgcolor: '#f44336', color: 'white' }}>
+                              <CardContent>
+                                <Typography variant="h5" component="div">
+                                  {formatCurrency(totalLoss)}
+                                </Typography>
+                                <Typography variant="body2">
+                                  Prejuízo Total
+                                </Typography>
+                              </CardContent>
+                            </Card>
+                          </Grid>
+                        </React.Fragment>
+                        <React.Fragment>
+                          <Grid item xs={6}>
+                            <Card sx={{ bgcolor: '#2196f3', color: 'white' }}>
+                              <CardContent>
+                                <Typography variant="h5" component="div">
+                                  {profitableCount}
+                                </Typography>
+                                <Typography variant="body2">
+                                  Impressões Lucrativas
+                                </Typography>
+                              </CardContent>
+                            </Card>
+                          </Grid>
+                        </React.Fragment>
+                        <React.Fragment>
+                          <Grid item xs={6}>
+                            <Card sx={{ bgcolor: '#ff9800', color: 'white' }}>
+                              <CardContent>
+                                <Typography variant="h5" component="div">
+                                  {unprofitableCount}
+                                </Typography>
+                                <Typography variant="body2">
+                                  Impressões não Lucrativas
+                                </Typography>
+                              </CardContent>
+                            </Card>
+                          </Grid>
+                        </React.Fragment>
                       </Grid>
-                      <Grid item xs={6}>
-                        <Card sx={{ bgcolor: '#f44336', color: 'white' }}>
-                          <CardContent>
-                            <Typography variant="h5" component="div">
-                              {formatCurrency(totalLoss)}
-                            </Typography>
-                            <Typography variant="body2">
-                              Prejuízo Total
-                            </Typography>
-                          </CardContent>
-                        </Card>
-                      </Grid>
-                      <Grid item xs={6}>
-                        <Card sx={{ bgcolor: '#2196f3', color: 'white' }}>
-                          <CardContent>
-                            <Typography variant="h5" component="div">
-                              {profitableCount}
-                            </Typography>
-                            <Typography variant="body2">
-                              Impressões Lucrativas
-                            </Typography>
-                          </CardContent>
-                        </Card>
-                      </Grid>
-                      <Grid item xs={6}>
-                        <Card sx={{ bgcolor: '#ff9800', color: 'white' }}>
-                          <CardContent>
-                            <Typography variant="h5" component="div">
-                              {unprofitableCount}
-                            </Typography>
-                            <Typography variant="body2">
-                              Impressões não Lucrativas
-                            </Typography>
-                          </CardContent>
-                        </Card>
-                      </Grid>
-                    </Grid>
-                  </Box>
-                  <Divider sx={{ my: 2 }} />
-                  <Typography variant="body1">
-                    Economia Líquida: <strong>{formatCurrency(totalSavings - totalLoss)}</strong>
-                  </Typography>
-                </Paper>
-              </Grid>
+                    </Box>
+                    <Divider sx={{ my: 2 }} />
+                    <Typography variant="body1">
+                      Economia Líquida: <strong>{formatCurrency(totalSavings - totalLoss)}</strong>
+                    </Typography>
+                  </Paper>
+                </Grid>
+              </React.Fragment>
               
-              <Grid item xs={12} md={6}>
-                <Paper sx={{ p: 3, height: '100%' }}>
-                  <Typography variant="h6" gutterBottom>
-                    Distribuição de Lucratividade
-                  </Typography>
-                  <Box sx={{ height: 300 }}>
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={[
-                            { name: 'Lucrativo', value: profitableCount, color: '#4caf50' },
-                            { name: 'Não Lucrativo', value: unprofitableCount, color: '#f44336' }
-                          ]}
-                          cx="50%"
-                          cy="50%"
-                          labelLine={true}
-                          label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                          outerRadius={80}
-                          fill="#8884d8"
-                          dataKey="value"
-                        >
-                          <Cell fill="#4caf50" />
-                          <Cell fill="#f44336" />
-                        </Pie>
-                        <Tooltip formatter={(value) => [`${value} impressões`, 'Quantidade']} />
-                        <Legend />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </Box>
-                </Paper>
-              </Grid>
+              <React.Fragment>
+                <Grid item xs={12} md={6}>
+                  <Paper sx={{ p: 3, height: '100%' }}>
+                    <Typography variant="h6" gutterBottom>
+                      Distribuição de Lucratividade
+                    </Typography>
+                    <Box sx={{ height: 300, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                      <Typography variant="body1">
+                        Gráfico de pizza com distribuição de lucratividade
+                      </Typography>
+                    </Box>
+                  </Paper>
+                </Grid>
+              </React.Fragment>
               
-              <Grid item xs={12}>
-                <Paper sx={{ p: 3 }}>
-                  <Typography variant="h6" gutterBottom>
-                    Análise Detalhada de Custo-Benefício
-                  </Typography>
-                  <TableContainer>
-                    <Table>
-                      <TableHead>
-                        <TableRow>
-                          <TableCell>Título</TableCell>
-                          <TableCell>Peça</TableCell>
-                          <TableCell align="right">Valor Original</TableCell>
-                          <TableCell align="right">Custo Impressão</TableCell>
-                          <TableCell align="right">Ganho/Prejuízo</TableCell>
-                          <TableCell align="right">Resultado</TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {costAnalysisData.map((row) => (
-                          <TableRow key={row.id}>
-                            <TableCell component="th" scope="row">
-                              {row.title}
-                            </TableCell>
-                            <TableCell>{row.partName}</TableCell>
-                            <TableCell align="right">{formatCurrency(row.partValue)}</TableCell>
-                            <TableCell align="right">{formatCurrency(row.printingCost)}</TableCell>
-                            <TableCell 
-                              align="right"
-                              sx={{ 
-                                color: row.isProfitable ? 'success.main' : 'error.main',
-                                fontWeight: 'bold'
-                              }}
-                            >
-                              {formatCurrency(row.profitLoss)}
-                            </TableCell>
-                            <TableCell align="right">
-                              {row.isProfitable ? 'Economia' : 'Prejuízo'}
-                            </TableCell>
+              <React.Fragment>
+                <Grid item xs={12}>
+                  <Paper sx={{ p: 3 }}>
+                    <Typography variant="h6" gutterBottom>
+                      Análise Detalhada de Custo-Benefício
+                    </Typography>
+                    <TableContainer>
+                      <Table>
+                        <TableHead>
+                          <TableRow>
+                            <TableCell>Título</TableCell>
+                            <TableCell>Peça</TableCell>
+                            <TableCell align="right">Valor Original</TableCell>
+                            <TableCell align="right">Custo Impressão</TableCell>
+                            <TableCell align="right">Ganho/Prejuízo</TableCell>
+                            <TableCell align="right">Resultado</TableCell>
                           </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                </Paper>
-              </Grid>
+                        </TableHead>
+                        <TableBody>
+                          {costAnalysisData.map((row) => (
+                            <TableRow key={row.id}>
+                              <TableCell component="th" scope="row">
+                                {row.title}
+                              </TableCell>
+                              <TableCell>{row.partName}</TableCell>
+                              <TableCell align="right">{formatCurrency(row.partValue)}</TableCell>
+                              <TableCell align="right">{formatCurrency(row.printingCost)}</TableCell>
+                              <TableCell 
+                                align="right"
+                                sx={{ 
+                                  color: row.isProfitable ? 'success.main' : 'error.main',
+                                  fontWeight: 'bold'
+                                }}
+                              >
+                                {formatCurrency(row.profitLoss)}
+                              </TableCell>
+                              <TableCell align="right">
+                                {row.isProfitable ? 'Economia' : 'Prejuízo'}
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  </Paper>
+                </Grid>
+              </React.Fragment>
             </Grid>
           )}
         </>
