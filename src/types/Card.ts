@@ -3,25 +3,21 @@ export type CardStatus = 'Solicitado' | 'Aprovado' | 'Fila de Produção' | 'Em 
 
 export interface Card {
   id: string;
-  title: string;
+  titulo: string;
   status: CardStatus;
-  requestDate: Date;
-  requesterName: string;
-  department: string;
-  brand: string;
-  model: string;
-  partName: string;
-  partDescription: string;
-  quantity: number;
-  deadline: Date;
-  partImageUrl?: string;
-  applicationImageUrl?: string;
-  partValue?: number;
-  printingCost?: number;
-  profitLoss?: number;
-  isProfitable?: boolean;
-  createdBy: string;
-  createdAt: Date;
-  modifiedBy?: string;
-  modifiedAt?: Date;
+  dataSolicitacao: Date;
+  nomeSolicitante: string;
+  setorSolicitacao: string;
+  marca: string;
+  modelo: string;
+  nomePeca: string;
+  descricaoPeca: string;
+  quantidade: number;
+  prazoEntrega: Date | null;
+  imagemPeca?: string;
+  imagemAplicacao?: string;
+  valorPeca: number;
+  custoImpressao: number;
+  ganhoPrejuizo: number;
+  lucrativo: boolean;
 }

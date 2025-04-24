@@ -1,67 +1,19 @@
-// src/contexts/CardContext.tsx
-import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { v4 as uuidv4 } from 'uuid';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { Card, CardStatus } from '../types/Card';
+import { sharePointService } from '../services/sharePointService';
+import { useAuth } from './AuthContext';
 
-// Tipos simplificados
-export type CardStatus = 'Solicitado' | 'Aprovado' | 'Fila de Produção' | 'Em Produção' | 'Finalizado';
-
-export interface Card {
-  id: string;
-  title: string;
-  status: CardStatus;
-  requestDate: Date;
-  requesterName: string;
-  department: string;
-  partName: string;
-  description: string;
-  quantity: number;
-}
-
-// Interface para o contexto de cards
+// Interface para o contexto
 interface CardContextType {
   cards: Card[];
   loading: boolean;
-  addCard: (cardData: Omit<Card, 'id' | 'status' | 'requestDate'>) => void;
-  moveCard: (cardId: string) => void;
+  error: string | null;
+  addCard: (card: Omit<Card, 'id'>) => Promise<Card>;
+  updateCard: (id: string, cardData: Partial<Card>) => Promise<Card>;
+  deleteCard: (id: string) => Promise<void>;
+  moveCard: (id: string) => Promise<Card>;
   getCardById: (id: string) => Card | undefined;
 }
-
-// Dados mockados para teste
-const initialCards: Card[] = [
-  {
-    id: '1',
-    title: 'Suporte para sensor',
-    status: 'Solicitado',
-    requestDate: new Date(),
-    requesterName: 'João Silva',
-    department: 'Engenharia',
-    partName: 'Suporte sensor ABS',
-    description: 'Suporte para fixação do sensor ABS na suspensão dianteira',
-    quantity: 2
-  },
-  {
-    id: '2',
-    title: 'Capa de proteção',
-    status: 'Aprovado',
-    requestDate: new Date(),
-    requesterName: 'Maria Oliveira',
-    department: 'Produção',
-    partName: 'Capa protetora',
-    description: 'Capa de proteção para conector elétrico',
-    quantity: 10
-  },
-  {
-    id: '3',
-    title: 'Espaçador de mola',
-    status: 'Fila de Produção',
-    requestDate: new Date(),
-    requesterName: 'Carlos Santos',
-    department: 'Manutenção',
-    partName: 'Espaçador 10mm',
-    description: 'Espaçador para mola de suspensão traseira',
-    quantity: 4
-  }
-];
 
 // Criar o contexto
 const CardContext = createContext<CardContextType | undefined>(undefined);
@@ -82,66 +34,201 @@ interface CardProviderProps {
 
 // Provedor do contexto
 export const CardProvider: React.FC<CardProviderProps> = ({ children }) => {
-  const [cards, setCards] = useState<Card[]>(initialCards);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [cards, setCards] = useState<Card[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const { isAuthenticated, getToken } = useAuth();
 
-  // Função para adicionar um novo card
-  const addCard = (cardData: Omit<Card, 'id' | 'status' | 'requestDate'>): void => {
-    setLoading(true);
-    
-    // Simular atraso de rede
-    setTimeout(() => {
-      const newCard: Card = {
-        id: uuidv4(),
-        status: 'Solicitado',
-        requestDate: new Date(),
-        ...cardData
-      };
-      
-      setCards([...cards, newCard]);
-      setLoading(false);
-    }, 500);
-  };
-
-  // Função para mover um card para o próximo status
-  const moveCard = (cardId: string): void => {
-    setCards(cards.map(card => {
-      if (card.id === cardId) {
-        let newStatus: CardStatus = card.status;
-        
-        switch (card.status) {
-          case 'Solicitado':
-            newStatus = 'Aprovado';
-            break;
-          case 'Aprovado':
-            newStatus = 'Fila de Produção';
-            break;
-          case 'Fila de Produção':
-            newStatus = 'Em Produção';
-            break;
-          case 'Em Produção':
-            newStatus = 'Finalizado';
-            break;
-          default:
-            break;
-        }
-        
-        return { ...card, status: newStatus };
+  // Carregar cards ao inicializar
+  useEffect(() => {
+    const fetchCards = async () => {
+      if (!isAuthenticated) {
+        setLoading(false);
+        return;
       }
-      return card;
-    }));
-  };
 
-  // Função para buscar um card pelo ID
+      try {
+        setLoading(true);
+        setError(null);
+        
+        // Obter token de autenticação
+        const token = await getToken();
+        
+        // Configurar o serviço do SharePoint com o token
+        sharePointService.setAuthToken(token);
+        
+        // Obter cards do SharePoint
+        const fetchedCards = await sharePointService.getCards();
+        setCards(fetchedCards);
+      } catch (err: any) {
+        console.error('Erro ao carregar cards:', err);
+        setError('Não foi possível carregar as solicitações. Por favor, tente novamente.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCards();
+  }, [isAuthenticated, getToken]);
+
+  // Obter um card pelo ID
   const getCardById = (id: string): Card | undefined => {
     return cards.find(card => card.id === id);
+  };
+
+  // Adicionar um novo card
+  const addCard = async (cardData: Omit<Card, 'id'>): Promise<Card> => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Obter token de autenticação
+      const token = await getToken();
+      
+      // Configurar o serviço do SharePoint com o token
+      sharePointService.setAuthToken(token);
+      
+      // Criar card no SharePoint
+      const newCard = await sharePointService.createCard(cardData);
+      
+      // Atualizar estado local
+      setCards([...cards, newCard]);
+      
+      return newCard;
+    } catch (err: any) {
+      console.error('Erro ao adicionar card:', err);
+      setError('Não foi possível adicionar a solicitação. Por favor, tente novamente.');
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Atualizar um card existente
+  const updateCard = async (id: string, cardData: Partial<Card>): Promise<Card> => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Obter token de autenticação
+      const token = await getToken();
+      
+      // Configurar o serviço do SharePoint com o token
+      sharePointService.setAuthToken(token);
+      
+      // Obter o card atual
+      const currentCard = cards.find(card => card.id === id);
+      if (!currentCard) {
+        throw new Error(`Card com ID ${id} não encontrado`);
+      }
+      
+      // Mesclar dados atuais com as atualizações
+      const updatedCardData = { ...currentCard, ...cardData };
+      
+      // Atualizar card no SharePoint
+      const updatedCard = await sharePointService.updateCard(updatedCardData);
+      
+      // Atualizar estado local
+      setCards(cards.map(card => card.id === id ? updatedCard : card));
+      
+      return updatedCard;
+    } catch (err: any) {
+      console.error('Erro ao atualizar card:', err);
+      setError('Não foi possível atualizar a solicitação. Por favor, tente novamente.');
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Excluir um card
+  const deleteCard = async (id: string): Promise<void> => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Obter token de autenticação
+      const token = await getToken();
+      
+      // Configurar o serviço do SharePoint com o token
+      sharePointService.setAuthToken(token);
+      
+      // Excluir card no SharePoint
+      await sharePointService.deleteCard(id);
+      
+      // Atualizar estado local
+      setCards(cards.filter(card => card.id !== id));
+    } catch (err: any) {
+      console.error('Erro ao excluir card:', err);
+      setError('Não foi possível excluir a solicitação. Por favor, tente novamente.');
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Mover um card para o próximo status
+  const moveCard = async (id: string): Promise<Card> => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Obter token de autenticação
+      const token = await getToken();
+      
+      // Configurar o serviço do SharePoint com o token
+      sharePointService.setAuthToken(token);
+      
+      // Obter o card atual
+      const currentCard = cards.find(card => card.id === id);
+      if (!currentCard) {
+        throw new Error(`Card com ID ${id} não encontrado`);
+      }
+      
+      // Determinar o próximo status
+      let nextStatus: CardStatus = currentCard.status;
+      switch (currentCard.status) {
+        case 'Solicitado':
+          nextStatus = 'Aprovado';
+          break;
+        case 'Aprovado':
+          nextStatus = 'Fila de Produção';
+          break;
+        case 'Fila de Produção':
+          nextStatus = 'Em Produção';
+          break;
+        case 'Em Produção':
+          nextStatus = 'Finalizado';
+          break;
+        default:
+          break;
+      }
+      
+      // Se o status não mudou, não fazer nada
+      if (nextStatus === currentCard.status) {
+        setLoading(false);
+        return currentCard;
+      }
+      
+      // Atualizar o status
+      return await updateCard(id, { status: nextStatus });
+    } catch (err: any) {
+      console.error('Erro ao mover card:', err);
+      setError('Não foi possível mover a solicitação. Por favor, tente novamente.');
+      throw err;
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Valor do contexto
   const contextValue: CardContextType = {
     cards,
     loading,
+    error,
     addCard,
+    updateCard,
+    deleteCard,
     moveCard,
     getCardById
   };

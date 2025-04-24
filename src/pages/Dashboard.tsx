@@ -1,18 +1,16 @@
-// src/pages/Dashboard.tsx
 import React, { useState, useEffect } from 'react';
 import { Box } from '@mui/material';
-import { useCardContext, CardStatus } from '../contexts/CardContext';
+import { useCardContext } from '../contexts/CardContext';
+import { CardStatus } from '../types/Card';
 import Header from '../components/Header';
 import CardColumn from '../components/CardColumn';
 import NewCardForm from '../components/NewCardForm';
-import { useAuth } from '../contexts/AuthContext';
 
 const Dashboard: React.FC = () => {
-  const { cards, moveCard } = useCardContext();
-  const { user } = useAuth();
+  const { cards, loading, error, moveCard } = useCardContext();
   const [showNewCardForm, setShowNewCardForm] = useState(false);
   
-  // Status disponíveis no sistema
+  // Lista de status possíveis
   const statuses: CardStatus[] = [
     'Solicitado',
     'Aprovado',
@@ -21,45 +19,69 @@ const Dashboard: React.FC = () => {
     'Finalizado'
   ];
   
-  // Função para obter cards por status
+  // Títulos para cada status
+  const statusTitles: Record<CardStatus, string> = {
+    'Solicitado': 'Solicitações',
+    'Aprovado': 'Aprovados',
+    'Fila de Produção': 'Na Fila',
+    'Em Produção': 'Produzindo',
+    'Finalizado': 'Finalizados'
+  };
+  
+  // Filtrar cards por status
   const getCardsByStatus = (status: CardStatus) => {
     return cards.filter(card => card.status === status);
   };
   
-  // Alternar exibição do formulário de nova solicitação
+  // Função para mover um card para o próximo status
+  const handleMoveCard = async (cardId: string): Promise<void> => {
+    try {
+      await moveCard(cardId);
+    } catch (error) {
+      console.error('Erro ao mover card:', error);
+    }
+  };
+  
+  // Alternar exibição do formulário de novo card
   const toggleNewCardForm = () => {
     setShowNewCardForm(!showNewCardForm);
   };
   
-  // Registrar informações do usuário autenticado
-  useEffect(() => {
-    if (user) {
-      console.log('Usuário autenticado:', user.name);
-    }
-  }, [user]);
-  
   return (
-    <Box sx={{ maxWidth: '1200px', mx: 'auto' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
       <Header 
+        title="PrintFlow 3D" 
         onNewCardClick={toggleNewCardForm}
-        showNewCardForm={showNewCardForm}
       />
       
-      <Box sx={{ p: 3 }}>
+      <Box sx={{ p: 3, flex: 1, overflowY: 'auto' }}>
         {showNewCardForm && (
-          <NewCardForm onCancel={toggleNewCardForm} />
+          <Box sx={{ mb: 4 }}>
+            <NewCardForm onClose={toggleNewCardForm} />
+          </Box>
         )}
         
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
-          {statuses.map((status) => (
-            <CardColumn 
-              key={status}
-              status={status}
-              cards={getCardsByStatus(status)}
-              onMoveCard={moveCard}
-            />
-          ))}
-        </Box>
+        {loading ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+            Carregando solicitações...
+          </Box>
+        ) : error ? (
+          <Box sx={{ color: 'error.main', mt: 4 }}>
+            {error}
+          </Box>
+        ) : (
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+            {statuses.map((status) => (
+              <CardColumn 
+                key={status}
+                title={statusTitles[status]}
+                status={status}
+                cards={cards}
+                onMoveCard={handleMoveCard}
+              />
+            ))}
+          </Box>
+        )}
       </Box>
     </Box>
   );

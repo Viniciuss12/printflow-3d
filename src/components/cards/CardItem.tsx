@@ -1,4 +1,4 @@
-// src/components/CardItem.tsx
+// src/components/cards/CardItem.tsx
 import React from 'react';
 import { 
   Typography, 
@@ -11,7 +11,7 @@ import {
   Chip
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { Card } from '../types/Card';
+import { Card } from '../../types/Card';
 
 interface CardItemProps {
   card: Card;
