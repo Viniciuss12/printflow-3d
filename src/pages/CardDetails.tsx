@@ -308,8 +308,176 @@ const CardDetails: React.FC = () => {
       <Paper sx={{ p: 3 }}>
         {editMode ? (
           <Grid container spacing={2}>
-            {/* Conteúdo do formulário de edição */}
-            {/* ... */}
+            <Grid item xs={12}>
+              <TextField
+                label="Título"
+                value={editedValues.titulo}
+                onChange={(e) => handleChange('titulo', e.target.value)}
+                fullWidth
+                required
+              />
+            </Grid>
+            
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Nome do Solicitante"
+                value={editedValues.nomeSolicitante}
+                onChange={(e) => handleChange('nomeSolicitante', e.target.value)}
+                fullWidth
+                required
+              />
+            </Grid>
+            
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Setor de Solicitação"
+                value={editedValues.setorSolicitacao}
+                onChange={(e) => handleChange('setorSolicitacao', e.target.value)}
+                fullWidth
+                required
+              />
+            </Grid>
+            
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Marca"
+                value={editedValues.marca}
+                onChange={(e) => handleChange('marca', e.target.value)}
+                fullWidth
+              />
+            </Grid>
+            
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Modelo"
+                value={editedValues.modelo}
+                onChange={(e) => handleChange('modelo', e.target.value)}
+                fullWidth
+              />
+            </Grid>
+            
+            <Grid item xs={12} sm={8}>
+              <TextField
+                label="Nome da Peça"
+                value={editedValues.nomePeca}
+                onChange={(e) => handleChange('nomePeca', e.target.value)}
+                fullWidth
+                required
+              />
+            </Grid>
+            
+            <Grid item xs={12} sm={4}>
+              <TextField
+                label="Quantidade"
+                value={editedValues.quantidade}
+                onChange={(e) => handleChange('quantidade', parseInt(e.target.value) || 0)}
+                fullWidth
+                type="number"
+                inputProps={{ min: 1 }}
+              />
+            </Grid>
+            
+            <Grid item xs={12}>
+              <TextField
+                label="Descrição da Peça"
+                value={editedValues.descricaoPeca}
+                onChange={(e) => handleChange('descricaoPeca', e.target.value)}
+                fullWidth
+                multiline
+                rows={3}
+              />
+            </Grid>
+            
+            <Grid item xs={12} sm={6}>
+              <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={ptBR}>
+                <DatePicker
+                  label="Prazo de Entrega"
+                  value={editedValues.prazoEntrega}
+                  onChange={(newValue) => handleChange('prazoEntrega', newValue)}
+                  slotProps={{
+                    textField: { fullWidth: true }
+                  }}
+                />
+              </LocalizationProvider>
+            </Grid>
+            
+            <Grid item xs={12}>
+              <Divider sx={{ my: 1 }} />
+              <Typography variant="subtitle2" gutterBottom>
+                Informações Financeiras
+              </Typography>
+            </Grid>
+            
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Valor da Peça"
+                value={editedValues.valorPeca}
+                onChange={(e) => handleChange('valorPeca', parseFloat(e.target.value) || 0)}
+                fullWidth
+                type="number"
+                InputProps={{
+                  startAdornment: <InputAdornment position="start">R$</InputAdornment>,
+                }}
+              />
+            </Grid>
+            
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Custo de Impressão"
+                value={editedValues.custoImpressao}
+                onChange={(e) => handleChange('custoImpressao', parseFloat(e.target.value) || 0)}
+                fullWidth
+                type="number"
+                InputProps={{
+                  startAdornment: <InputAdornment position="start">R$</InputAdornment>,
+                }}
+              />
+            </Grid>
+            
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Ganho/Prejuízo"
+                value={calcularGanhoPrejuizo().toFixed(2)}
+                fullWidth
+                InputProps={{
+                  startAdornment: <InputAdornment position="start">R$</InputAdornment>,
+                  readOnly: true,
+                }}
+              />
+            </Grid>
+            
+            <Grid item xs={12} sm={6}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={editedValues.lucrativo}
+                    onChange={(e) => handleChange('lucrativo', e.target.checked)}
+                    color="success"
+                  />
+                }
+                label="Lucrativo"
+              />
+            </Grid>
+            
+            <Grid item xs={12}>
+              <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
+                <Button 
+                  variant="outlined" 
+                  onClick={toggleEditMode}
+                  sx={{ mr: 1 }}
+                >
+                  Cancelar
+                </Button>
+                <Button 
+                  variant="contained" 
+                  color="primary" 
+                  onClick={handleSaveChanges}
+                  disabled={updating}
+                >
+                  {updating ? <CircularProgress size={24} /> : 'Salvar'}
+                </Button>
+              </Box>
+            </Grid>
           </Grid>
         ) : (
           <>
@@ -329,53 +497,126 @@ const CardDetails: React.FC = () => {
             <Divider sx={{ my: 2 }} />
             
             <Grid container spacing={2}>
-              {/* Detalhes do card */}
-              {/* ... */}
+              <Grid item xs={12} sm={6}>
+                <Typography variant="subtitle2">Nome do Solicitante</Typography>
+                <Typography variant="body1" gutterBottom>{card.nomeSolicitante}</Typography>
+              </Grid>
+              
+              <Grid item xs={12} sm={6}>
+                <Typography variant="subtitle2">Setor</Typography>
+                <Typography variant="body1" gutterBottom>{card.setorSolicitacao}</Typography>
+              </Grid>
+              
+              <Grid item xs={12} sm={6}>
+                <Typography variant="subtitle2">Data de Solicitação</Typography>
+                <Typography variant="body1" gutterBottom>{formatDate(card.dataSolicitacao)}</Typography>
+              </Grid>
+              
+              <Grid item xs={12} sm={6}>
+                <Typography variant="subtitle2">Prazo de Entrega</Typography>
+                <Typography variant="body1" gutterBottom>{formatDate(card.prazoEntrega)}</Typography>
+              </Grid>
+              
+              <Grid item xs={12}>
+                <Divider sx={{ my: 2 }} />
+                <Typography variant="subtitle1" gutterBottom>Informações da Peça</Typography>
+              </Grid>
+              
+              <Grid item xs={12} sm={6}>
+                <Typography variant="subtitle2">Nome da Peça</Typography>
+                <Typography variant="body1" gutterBottom>{card.nomePeca}</Typography>
+              </Grid>
+              
+              <Grid item xs={12} sm={6}>
+                <Typography variant="subtitle2">Quantidade</Typography>
+                <Typography variant="body1" gutterBottom>{card.quantidade}</Typography>
+              </Grid>
+              
+              <Grid item xs={12} sm={6}>
+                <Typography variant="subtitle2">Marca</Typography>
+                <Typography variant="body1" gutterBottom>{card.marca || 'Não especificado'}</Typography>
+              </Grid>
+              
+              <Grid item xs={12} sm={6}>
+                <Typography variant="subtitle2">Modelo</Typography>
+                <Typography variant="body1" gutterBottom>{card.modelo || 'Não especificado'}</Typography>
+              </Grid>
+              
+              <Grid item xs={12}>
+                <Typography variant="subtitle2">Descrição da Peça</Typography>
+                <Typography variant="body1" gutterBottom>{card.descricaoPeca || 'Sem descrição'}</Typography>
+              </Grid>
+              
+              <Grid item xs={12}>
+                <Divider sx={{ my: 2 }} />
+                <Typography variant="subtitle1" gutterBottom>Informações Financeiras</Typography>
+              </Grid>
+              
+              <Grid item xs={12} sm={4}>
+                <Typography variant="subtitle2">Valor da Peça</Typography>
+                <Typography variant="body1" gutterBottom>{formatCurrency(card.valorPeca)}</Typography>
+              </Grid>
+              
+              <Grid item xs={12} sm={4}>
+                <Typography variant="subtitle2">Custo de Impressão</Typography>
+                <Typography variant="body1" gutterBottom>{formatCurrency(card.custoImpressao)}</Typography>
+              </Grid>
+              
+              <Grid item xs={12} sm={4}>
+                <Typography variant="subtitle2">Ganho/Prejuízo</Typography>
+                <Typography 
+                  variant="body1" 
+                  gutterBottom
+                  color={card.lucrativo ? 'success.main' : 'error.main'}
+                >
+                  {formatCurrency(card.ganhoPrejuizo)}
+                </Typography>
+              </Grid>
               
               <Grid item xs={12}>
                 <Divider sx={{ my: 2 }} />
                 <Typography variant="subtitle1" gutterBottom>Imagens</Typography>
               </Grid>
-              
-              <Grid container spacing={3}>
-                <Grid item xs={12} md={6}>
-                  <ImageUpload 
-                    label="Imagem da Peça" 
-                    onImageUploaded={handlePartImageUploaded}
-                    currentImageUrl={card.imagemPeca}
-                    onImageUpload={handleImageUpload}
-                    imageType="peca"
-                  />
-                </Grid>
-                
-                <Grid item xs={12} md={6}>
-                  <ImageUpload 
-                    label="Imagem da Aplicação" 
-                    onImageUploaded={handleApplicationImageUploaded}
-                    currentImageUrl={card.imagemAplicacao}
-                    onImageUpload={handleImageUpload}
-                    imageType="aplicacao"
-                  />
-                </Grid>
+            </Grid>
+            
+            <Grid container spacing={3}>
+              <Grid item xs={12} md={6}>
+                <Typography variant="subtitle2" gutterBottom>Imagem da Peça</Typography>
+                <ImageUpload 
+                  label="Imagem da Peça" 
+                  onImageUploaded={handlePartImageUploaded}
+                  currentImageUrl={card.imagemPeca}
+                  onImageUpload={handleImageUpload}
+                  imageType="peca"
+                />
               </Grid>
               
-              <Divider sx={{ my: 2 }} />
-              
-              {card.status !== 'Finalizado' && (
-                <Grid item xs={12}>
-                  <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
-                    <Button 
-                      variant="contained" 
-                      color="primary" 
-                      onClick={handleMoveCard}
-                      disabled={updating}
-                    >
-                      {updating ? <CircularProgress size={24} /> : 'Avançar Status'}
-                    </Button>
-                  </Box>
-                </Grid>
-              )}
+              <Grid item xs={12} md={6}>
+                <Typography variant="subtitle2" gutterBottom>Imagem da Aplicação</Typography>
+                <ImageUpload 
+                  label="Imagem da Aplicação" 
+                  onImageUploaded={handleApplicationImageUploaded}
+                  currentImageUrl={card.imagemAplicacao}
+                  onImageUpload={handleImageUpload}
+                  imageType="aplicacao"
+                />
+              </Grid>
             </Grid>
+            
+            <Divider sx={{ my: 2 }} />
+            
+            {card.status !== 'Finalizado' && (
+              <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
+                <Button 
+                  variant="contained" 
+                  color="primary" 
+                  onClick={handleMoveCard}
+                  disabled={updating}
+                >
+                  {updating ? <CircularProgress size={24} /> : 'Avançar Status'}
+                </Button>
+              </Box>
+            )}
           </>
         )}
       </Paper>

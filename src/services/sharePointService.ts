@@ -241,14 +241,47 @@ export class SharePointService {
     try {
       this.checkConfig();
       
-      // Implementação mínima - usar apenas os campos essenciais
+      // Criar um objeto com todos os campos necessários
       // Usar Record<string, any> para permitir propriedades dinâmicas
       const requestBody: { fields: Record<string, any> } = {
         fields: {
           Title: card.titulo,
-          Status: 'Solicitado'
+          Status: 'Solicitado',
+          NomeSolicitante: card.nomeSolicitante || '',
+          SetorSolicitacao: card.setorSolicitacao || '',
+          NomePeca: card.nomePeca || ''
         }
       };
+      
+      // Adicionar campos opcionais apenas se tiverem valores válidos
+      if (card.marca) {
+        requestBody.fields.Marca = card.marca;
+      }
+      
+      if (card.modelo) {
+        requestBody.fields.Modelo = card.modelo;
+      }
+      
+      if (card.descricaoPeca) {
+        requestBody.fields.DescricaoPeca = card.descricaoPeca;
+      }
+      
+      if (typeof card.quantidade === 'number' && !isNaN(card.quantidade)) {
+        requestBody.fields.Quantidade = card.quantidade.toString();
+      }
+      
+      if (card.dataSolicitacao instanceof Date) {
+        // Formato ISO 8601 sem timezone (Z)
+        requestBody.fields.DataSolicitacao = card.dataSolicitacao.toISOString().replace('Z', '');
+      }
+      
+      if (card.prazoEntrega instanceof Date) {
+        // Formato ISO 8601 sem timezone (Z)
+        requestBody.fields.PrazoEntrega = card.prazoEntrega.toISOString().replace('Z', '');
+      }
+      
+      // Campos financeiros desativados conforme solicitado
+      // Não enviar ValorPeca, CustoImpressao e GanhoPrejuizo
       
       if (this.debugMode) {
         console.log('Criando card com dados:', JSON.stringify(requestBody));
@@ -281,14 +314,55 @@ export class SharePointService {
       
       const cardId = id || card.id;
       
-      // Implementação mínima - usar apenas os campos essenciais
+      // Criar um objeto com todos os campos necessários
       // Usar Record<string, any> para permitir propriedades dinâmicas
       const updateBody: { fields: Record<string, any> } = {
         fields: {
           Title: card.titulo,
-          Status: card.status
+          Status: card.status,
+          NomeSolicitante: card.nomeSolicitante || '',
+          SetorSolicitacao: card.setorSolicitacao || '',
+          NomePeca: card.nomePeca || ''
         }
       };
+      
+      // Adicionar campos opcionais apenas se tiverem valores válidos
+      if (card.marca) {
+        updateBody.fields.Marca = card.marca;
+      }
+      
+      if (card.modelo) {
+        updateBody.fields.Modelo = card.modelo;
+      }
+      
+      if (card.descricaoPeca) {
+        updateBody.fields.DescricaoPeca = card.descricaoPeca;
+      }
+      
+      if (typeof card.quantidade === 'number' && !isNaN(card.quantidade)) {
+        updateBody.fields.Quantidade = card.quantidade.toString();
+      }
+      
+      if (card.dataSolicitacao instanceof Date) {
+        // Formato ISO 8601 sem timezone (Z)
+        updateBody.fields.DataSolicitacao = card.dataSolicitacao.toISOString().replace('Z', '');
+      }
+      
+      if (card.prazoEntrega instanceof Date) {
+        // Formato ISO 8601 sem timezone (Z)
+        updateBody.fields.PrazoEntrega = card.prazoEntrega.toISOString().replace('Z', '');
+      }
+      
+      if (card.imagemPeca) {
+        updateBody.fields.ImagemPeca = card.imagemPeca;
+      }
+      
+      if (card.imagemAplicacao) {
+        updateBody.fields.ImagemAplicacao = card.imagemAplicacao;
+      }
+      
+      // Campos financeiros desativados conforme solicitado
+      // Não enviar ValorPeca, CustoImpressao e GanhoPrejuizo
       
       if (this.debugMode) {
         console.log(`Atualizando card ${cardId} com dados:`, JSON.stringify(updateBody));
